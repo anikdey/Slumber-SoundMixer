@@ -13,3 +13,15 @@
 .externalNativeBuild
 .cxx
 local.properties
+.idea
+.claude
+
+# Keystore files
+*.jks
+*.keystore
+
+# Keystore properties
+keystore.properties
+build-logic/convention/build
+build-logic/.gradle
+build-logic/.kotlin
