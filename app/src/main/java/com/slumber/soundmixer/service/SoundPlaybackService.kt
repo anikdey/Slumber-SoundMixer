@@ -5,8 +5,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.CountDownTimer
@@ -32,8 +36,51 @@ class SoundPlaybackService : Service() {
     private val players = mutableMapOf<String, MediaPlayer>()
     private var countDownTimer: CountDownTimer? = null
     private var isFading = false
+    private var isDucking = false
+    private var wasPlayingBeforeFocusLoss = false
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var notificationManager: NotificationManagerCompat
+    private lateinit var audioManager: AudioManager
+    private var audioFocusRequest: AudioFocusRequest? = null
+
+    private val audioFocusListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                isDucking = false
+                if (!isFading) restoreVolumes()
+                if (wasPlayingBeforeFocusLoss) {
+                    wasPlayingBeforeFocusLoss = false
+                    ensurePlayersCreated()
+                    players.values.forEach { runCatching { it.start() } }
+                    repo.setPlaying(true)
+                    updateNotification()
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                wasPlayingBeforeFocusLoss = false
+                if (repo.isPlaying.value) {
+                    players.values.forEach { runCatching { it.pause() } }
+                    repo.setPlaying(false)
+                    updateNotification()
+                }
+                abandonAudioFocus()
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                wasPlayingBeforeFocusLoss = repo.isPlaying.value
+                if (repo.isPlaying.value) {
+                    players.values.forEach { runCatching { it.pause() } }
+                    repo.setPlaying(false)
+                    updateNotification()
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                isDucking = true
+                repo.activeSounds.value.forEach { (id, s) ->
+                    players[id]?.setVolume(s.volume * 0.2f, s.volume * 0.2f)
+                }
+            }
+        }
+    }
 
     companion object {
         const val CHANNEL_ID = "slumber_playback"
@@ -49,6 +96,7 @@ class SoundPlaybackService : Service() {
     override fun onCreate() {
         super.onCreate()
         notificationManager = NotificationManagerCompat.from(this)
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         createNotificationChannel()
         observeActiveSounds()
     }
@@ -57,6 +105,7 @@ class SoundPlaybackService : Service() {
         startForegroundCompat()
         when (intent?.action) {
             ACTION_PLAY -> {
+                requestAudioFocus()
                 ensurePlayersCreated()
                 repo.setPlaying(true)
                 players.values.forEach { runCatching { it.start() } }
@@ -64,7 +113,10 @@ class SoundPlaybackService : Service() {
             ACTION_PAUSE -> {
                 repo.setPlaying(false)
                 players.values.forEach { runCatching { it.pause() } }
-                if (repo.timerMillisRemaining.value == 0L) stopSelf()
+                if (repo.timerMillisRemaining.value == 0L) {
+                    abandonAudioFocus()
+                    stopSelf()
+                }
             }
             ACTION_SET_TIMER -> {
                 val minutes = intent.getIntExtra(EXTRA_TIMER_MINUTES, 30)
@@ -77,7 +129,10 @@ class SoundPlaybackService : Service() {
                 isFading = false
                 restoreVolumes()
                 repo.clearTimer()
-                if (!repo.isPlaying.value) stopSelf()
+                if (!repo.isPlaying.value) {
+                    abandonAudioFocus()
+                    stopSelf()
+                }
             }
             ACTION_STOP -> {
                 cleanup()
@@ -131,10 +186,46 @@ class SoundPlaybackService : Service() {
                 repo.setPlaying(false)
                 repo.clearTimer()
                 players.values.forEach { runCatching { it.pause() } }
+                abandonAudioFocus()
                 updateNotification()
                 stopSelf()
             }
         }.start()
+    }
+
+    private fun requestAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(audioFocusListener)
+                .build()
+            audioManager.requestAudioFocus(audioFocusRequest!!)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.requestAudioFocus(
+                audioFocusListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+        }
+    }
+
+    private fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
+            audioFocusRequest = null
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.abandonAudioFocus(audioFocusListener)
+        }
+        isDucking = false
+        wasPlayingBeforeFocusLoss = false
     }
 
     private fun restoreVolumes() {
@@ -249,6 +340,7 @@ class SoundPlaybackService : Service() {
         players.clear()
         repo.setPlaying(false)
         repo.clearTimer()
+        abandonAudioFocus()
     }
 
     override fun onDestroy() {

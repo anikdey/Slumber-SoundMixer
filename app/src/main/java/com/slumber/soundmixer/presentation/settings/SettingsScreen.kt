@@ -26,8 +26,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.slumber.soundmixer.R
-import com.slumber.soundmixer.ui.components.NavTab
 import com.slumber.soundmixer.ui.components.SectionLabel
 import com.slumber.soundmixer.ui.components.SleepBottomNav
 import com.slumber.soundmixer.ui.theme.AppTheme
@@ -35,7 +35,7 @@ import com.slumber.soundmixer.util.AppConfig
 
 @Composable
 fun SettingsScreen(
-    onTabSelected: (NavTab) -> Unit = {},
+    navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val isPro by viewModel.isPro.collectAsState()
@@ -157,10 +157,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(AppTheme.dimensions.spaces.x4))
         } // end inner scrollable column
 
-        SleepBottomNav(
-            selected = NavTab.Settings,
-            onTabSelected = onTabSelected
-        )
+        SleepBottomNav(navController = navController)
     }
 }
 
@@ -291,8 +288,3 @@ fun SettingsDivider() {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun SettingsScreenPreview() {
-    SettingsScreen()
-}

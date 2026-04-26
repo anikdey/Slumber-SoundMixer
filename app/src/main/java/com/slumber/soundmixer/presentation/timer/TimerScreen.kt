@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import android.content.res.Configuration
+import androidx.navigation.NavController
 import com.slumber.soundmixer.R
-import com.slumber.soundmixer.ui.components.NavTab
 import com.slumber.soundmixer.ui.components.SectionLabel
 import com.slumber.soundmixer.ui.components.SleepBottomNav
 import com.slumber.soundmixer.ui.theme.AppTheme
@@ -45,7 +45,7 @@ private fun Long.toTimerDisplay(): String {
 
 @Composable
 fun TimerScreen(
-    onTabSelected: (NavTab) -> Unit = {},
+    navController: NavController,
     viewModel: TimerViewModel = hiltViewModel()
 ) {
     val selectedMinutes by viewModel.selectedMinutes.collectAsState()
@@ -235,10 +235,7 @@ fun TimerScreen(
             Spacer(Modifier.height(AppTheme.dimensions.spaces.x4))
         } // end inner scrollable column
 
-        SleepBottomNav(
-            selected = NavTab.Timer,
-            onTabSelected = onTabSelected
-        )
+        SleepBottomNav(navController = navController)
     }
 }
 
@@ -507,8 +504,3 @@ fun FadeToggleRow(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun TimerScreenPreview() {
-    TimerScreen()
-}

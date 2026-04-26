@@ -45,9 +45,6 @@ fun CreateMixScreen(
     val selectedTimerMinutes by viewModel.selectedTimerMinutes.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.reset()
-    }
-    LaunchedEffect(Unit) {
         viewModel.navigateToUpgrade.collectLatest { onShowUpgrade() }
     }
     LaunchedEffect(Unit) {

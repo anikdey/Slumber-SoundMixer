@@ -22,11 +22,11 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.slumber.soundmixer.R
 import com.slumber.soundmixer.domain.model.Sound
 import com.slumber.soundmixer.domain.model.SoundRegistry
 import com.slumber.soundmixer.ui.components.GradientButton
-import com.slumber.soundmixer.ui.components.NavTab
 import com.slumber.soundmixer.ui.components.SectionLabel
 import com.slumber.soundmixer.ui.components.SleepBottomNav
 import com.slumber.soundmixer.ui.theme.AppTheme
@@ -34,7 +34,7 @@ import com.slumber.soundmixer.util.showToast
 
 @Composable
 fun MixerScreen(
-    onTabSelected: (NavTab) -> Unit = {},
+    navController: NavController,
     onShowUpgrade: () -> Unit = {},
     viewModel: MixerViewModel = hiltViewModel()
 ) {
@@ -160,10 +160,7 @@ fun MixerScreen(
             Spacer(Modifier.height(AppTheme.dimensions.spaces.x4))
         }
 
-        SleepBottomNav(
-            selected = NavTab.Mixer,
-            onTabSelected = onTabSelected
-        )
+        SleepBottomNav(navController = navController)
     }
 }
 
@@ -307,8 +304,3 @@ fun ActiveMixPanel(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF070B14)
-@Composable
-fun MixerScreenPreview() {
-    MixerScreen()
-}

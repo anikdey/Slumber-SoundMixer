@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,7 +18,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.slumber.soundmixer.R
+import com.slumber.soundmixer.navigation.Route
 import com.slumber.soundmixer.ui.theme.AppTheme
 import com.slumber.soundmixer.ui.theme.accentGradient
 
@@ -28,12 +33,25 @@ enum class NavTab(val emoji: String, @StringRes val labelRes: Int) {
     Settings("⚙️", R.string.nav_settings)
 }
 
+private val tabRoutes = listOf(
+    NavTab.Mixer    to Route.Mixer,
+    NavTab.Timer    to Route.Timer,
+    NavTab.Mixes    to Route.Mixes,
+    NavTab.Settings to Route.Settings,
+)
+
 @Composable
 fun SleepBottomNav(
-    selected: NavTab,
-    onTabSelected: (NavTab) -> Unit,
+    navController: NavController,
     modifier: Modifier = Modifier
 ) {
+    val currentBackStack by navController.currentBackStackEntryAsState()
+    val currentDest = currentBackStack?.destination
+
+    val selectedTab = tabRoutes.firstOrNull { (_, route) ->
+        currentDest?.hasRoute(route::class) == true
+    }?.first ?: NavTab.Mixer
+
     Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
@@ -47,14 +65,23 @@ fun SleepBottomNav(
                 .background(AppTheme.colors.surface),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            NavTab.entries.forEach { tab ->
-                val isActive = tab == selected
+            tabRoutes.forEach { (tab, route) ->
+                val isActive = tab == selectedTab
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(AppTheme.dimensions.radius.large))
-                        .clickable { onTabSelected(tab) }
+                        .clickable {
+                            navController.navigate(route) {
+                                popUpTo<Route.Mixer> {
+                                    saveState = true
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                         .padding(vertical = AppTheme.dimensions.spaces.x2)
                 ) {
                     Text(

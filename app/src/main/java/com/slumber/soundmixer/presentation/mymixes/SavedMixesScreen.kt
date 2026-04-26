@@ -21,11 +21,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.slumber.soundmixer.R
 import com.slumber.soundmixer.data.db.MixWithSounds
 import com.slumber.soundmixer.domain.model.SoundRegistry
-import com.slumber.soundmixer.presentation.createmix.CreateMixScreen
-import com.slumber.soundmixer.ui.components.NavTab
 import com.slumber.soundmixer.ui.components.SleepBottomNav
 import com.slumber.soundmixer.ui.components.SoundPill
 import com.slumber.soundmixer.ui.theme.AppTheme
@@ -33,24 +32,16 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SavedMixesScreen(
-    onTabSelected: (NavTab) -> Unit = {},
+    navController: NavController,
+    onCreateMix: () -> Unit = {},
     onShowUpgrade: () -> Unit = {},
     viewModel: SavedMixesViewModel = hiltViewModel()
 ) {
     val mixes by viewModel.mixes.collectAsState()
     val isPro by viewModel.isPro.collectAsState()
-    var showCreateMix by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.navigateToUpgrade.collectLatest { onShowUpgrade() }
-    }
-
-    if (showCreateMix) {
-        CreateMixScreen(
-            onClose = { showCreateMix = false },
-            onShowUpgrade = onShowUpgrade
-        )
-        return
     }
 
     Column(
@@ -100,7 +91,7 @@ fun SavedMixesScreen(
                             RoundedCornerShape(AppTheme.dimensions.radius.large)
                         )
                         .clickable {
-                            viewModel.onAddMixClicked { showCreateMix = true }
+                            viewModel.onAddMixClicked { onCreateMix() }
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -115,7 +106,7 @@ fun SavedMixesScreen(
 
             if (mixes.isEmpty()) {
                 EmptyMixesState(
-                    onCreateMix = { viewModel.onAddMixClicked { showCreateMix = true } }
+                    onCreateMix = { viewModel.onAddMixClicked { onCreateMix() } }
                 )
             } else {
                 Column(
@@ -140,10 +131,7 @@ fun SavedMixesScreen(
             }
         }
 
-        SleepBottomNav(
-            selected = NavTab.Mixes,
-            onTabSelected = onTabSelected
-        )
+        SleepBottomNav(navController = navController)
     }
 }
 

@@ -3,6 +3,8 @@ package com.slumber.soundmixer
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
+import android.app.Activity
+import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -14,11 +16,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import android.app.Activity
-import android.content.pm.PackageManager
 import androidx.compose.material3.AlertDialog
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,23 +25,20 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
+import com.slumber.soundmixer.navigation.AppNavHost
+import com.slumber.soundmixer.navigation.Route
 import com.slumber.soundmixer.presentation.AppViewModel
-import com.slumber.soundmixer.presentation.mixer.MixerScreen
-import com.slumber.soundmixer.presentation.mymixes.SavedMixesScreen
-import com.slumber.soundmixer.presentation.onboarding.OnboardingScreen
 import com.slumber.soundmixer.presentation.onboarding.OnboardingViewModel
-import com.slumber.soundmixer.presentation.settings.SettingsScreen
-import com.slumber.soundmixer.presentation.timer.TimerScreen
-import com.slumber.soundmixer.presentation.upgrade.UpgradeScreen
-import com.slumber.soundmixer.ui.components.NavTab
 import com.slumber.soundmixer.ui.theme.AppTheme
 import com.slumber.soundmixer.ui.theme.SlumberSoundMixerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -66,8 +61,7 @@ fun SleepSoundsApp() {
 
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()
     val onboardingComplete by onboardingViewModel.onboardingComplete.collectAsState()
-    var selectedTab by rememberSaveable { mutableStateOf(NavTab.Mixer) }
-    var showUpgradeScreen by rememberSaveable { mutableStateOf(false) }
+
     var showNotificationRationale by rememberSaveable { mutableStateOf(false) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -150,34 +144,19 @@ fun SleepSoundsApp() {
             }
         }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppTheme.colors.surface)
-            .windowInsetsPadding(WindowInsets.systemBars)
-    ) {
-        if (!onboardingComplete) {
-            OnboardingScreen(
-                onGetStarted = { onboardingViewModel.completeOnboarding() }
-            )
-        } else {
-            when (selectedTab) {
-                NavTab.Mixer    -> MixerScreen(
-                    onTabSelected = { selectedTab = it },
-                    onShowUpgrade = { showUpgradeScreen = true }
-                )
-                NavTab.Timer    -> TimerScreen(onTabSelected = { selectedTab = it })
-                NavTab.Mixes    -> SavedMixesScreen(
-                    onTabSelected = { selectedTab = it },
-                    onShowUpgrade = { showUpgradeScreen = true }
-                )
-                NavTab.Settings -> SettingsScreen(onTabSelected = { selectedTab = it })
-            }
-        }
+        val navController = rememberNavController()
+        val startDestination = if (onboardingComplete) Route.Mixer else Route.Onboarding
 
-        if (showUpgradeScreen) {
-            UpgradeScreen(onDismiss = { showUpgradeScreen = false })
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AppTheme.colors.surface)
+                .windowInsetsPadding(WindowInsets.systemBars)
+        ) {
+            AppNavHost(
+                navController = navController,
+                startDestination = startDestination
+            )
         }
-    }
     }
 }
