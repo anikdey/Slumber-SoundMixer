@@ -1,0 +1,97 @@
+<resources>
+    <string name="app_name">Slumber-SoundMixer</string>
+
+    <string name="mixer_greeting">Good Evening 🌙</string>
+    <string name="mixer_subtitle">Choose your sounds</string>
+    <string name="mixer_btn_pause">⏸  Pause</string>
+    <string name="mixer_btn_play">▶  Play Mix</string>
+    <string name="mixer_section_active_mix">Active Mix</string>
+    <string name="mixer_empty_mix">Tap a sound above to build your mix</string>
+    <string name="mixer_toast_no_sounds">Select a sound first</string>
+    <string name="timer_toast_no_sounds">Go to Mixer and select a sound first</string>
+
+    <string name="sound_rain">Rain</string>
+    <string name="sound_ocean">Ocean</string>
+    <string name="sound_forest">Forest</string>
+    <string name="sound_fireplace">Fireplace</string>
+    <string name="sound_fan">Fan</string>
+    <string name="sound_thunder">Thunder</string>
+    <string name="sound_space">Space</string>
+    <string name="sound_brown">Brown</string>
+    <string name="sound_wind">Wind</string>
+
+    <string name="timer_title">Sleep Timer</string>
+    <string name="timer_subtitle">Sound stops automatically</string>
+    <string name="timer_section_stop_after">Stop after</string>
+    <string name="timer_now_playing">Now Playing</string>
+    <string name="timer_now_playing_sounds">🌧️ Rain · 🌊 Ocean</string>
+    <string name="timer_btn_set">Set Timer — %d min</string>
+    <string name="timer_custom_description">Set your own duration</string>
+    <string name="timer_custom_label">Custom</string>
+    <string name="timer_fade_title">Fade out gradually</string>
+    <string name="timer_fade_subtitle">Volume lowers over last 60 sec</string>
+    <string name="timer_preset_quick_nap">Quick nap</string>
+    <string name="timer_preset_light_sleep">Light sleep</string>
+    <string name="timer_preset_deep_sleep">Deep sleep</string>
+    <string name="timer_preset_full_cycle">Full cycle</string>
+    <string name="duration_minutes">%d min</string>
+
+    <string name="mixes_title">My Mixes</string>
+    <string name="mixes_subtitle">Your saved combinations</string>
+    <string name="mix_deep_sleep">Deep Sleep</string>
+    <string name="mix_focus">Focus Mode</string>
+    <string name="mix_cozy">Cozy Cabin</string>
+    <string name="mix_timer_45min">45 min timer</string>
+    <string name="mix_timer_none">No timer</string>
+    <string name="mix_timer_60min">60 min timer</string>
+    <string name="mix_sound_rain_78">🌧️ Rain 78%</string>
+    <string name="mix_sound_ocean_50">🌊 Ocean 50%</string>
+    <string name="mix_sound_brown_70">🎵 Brown Noise 70%</string>
+    <string name="mix_sound_fire_80">🔥 Fire 80%</string>
+    <string name="mix_sound_rain_40">🌧️ Rain 40%</string>
+    <string name="mix_sound_thunder_25">⚡ Thunder 25%</string>
+
+    <plurals name="mix_sounds_count">
+        <item quantity="one">%d sound · %s</item>
+        <item quantity="other">%d sounds · %s</item>
+    </plurals>
+
+    <string name="pro_title">Unlock Pro</string>
+    <string name="pro_description">20+ sounds · 4-sound mixes · No ads</string>
+    <string name="pro_price">€1.99</string>
+
+    <string name="nav_mixer">Mixer</string>
+    <string name="nav_timer">Timer</string>
+    <string name="nav_mixes">Mixes</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_subtitle">App preferences</string>
+
+    <string name="settings_restore_title">Restore Purchases</string>
+    <string name="settings_restore_subtitle">Already bought Pro? Tap to restore</string>
+    <string name="settings_restore_already_pro">Pro is active ✓</string>
+    <string name="settings_restore_not_found">No purchases found</string>
+    <string name="settings_rate_title">Rate the App</string>
+    <string name="settings_rate_subtitle">Enjoying Slumber? Leave a review</string>
+    <string name="settings_privacy_title">Privacy Policy</string>
+    <string name="settings_terms_title">Terms of Use</string>
+    <string name="settings_version_title">Version</string>
+    <string name="settings_dark_mode_title">Dark Mode</string>
+    <string name="settings_dark_mode_on">Dark theme active</string>
+    <string name="settings_dark_mode_off">Light theme active</string>
+
+    <string name="notif_rationale_title">Stay in control while you drift off</string>
+    <string name="notif_rationale_body">Slumber shows a notification so you can pause or stop your mix without unlocking your phone. Without it, you\'ll need to open the app to control playback.</string>
+    <string name="notif_rationale_confirm">Got it</string>
+    <string name="notif_rationale_skip">Not now</string>
+
+    <string name="widget_label">SLEEP SOUNDS</string>
+    <string name="widget_screen_label">Home screen widgets</string>
+    <string name="widget_btn_play">Play</string>
+    <string name="widget_mix_name">Rain + Ocean</string>
+    <string name="widget_last_used">Last used mix · 45 min</string>
+    <string name="widget_chip_rain">🌧️ Rain</string>
+    <string name="widget_chip_ocean">🌊 Ocean</string>
+    <string name="widget_timer_duration">30m</string>
+</resources>
